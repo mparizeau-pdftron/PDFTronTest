@@ -1,47 +1,60 @@
 import React from "react";
-import { Core } from "@pdftron/webviewer";
 import { saveAs } from "file-saver";
 
-function App() {
-  const saveBufferAsPDFDoc = (buf, name) => {
-    saveBuffer(buf, name, "application/pdf");
-  };
-
-  const saveBuffer = (buf, name, mimetype) => {
+const App = () => {
+  function saveBuffer(buf, name, mimetype) {
     const blob = new Blob([buf], {
       type: mimetype,
     });
-    saveAs(blob, name);
-  };
+    console.log(blob, name);
+    return saveAs(blob, name);
+  }
 
-  const generatePdfDocument = () => {
-    const PDFNet = Core.PDFNet;
-    const convertOfficeToPDF = (inputUrl, outputName, l) =>
-      Core.office2PDFBuffer(inputUrl, { l }).then((buffer) => {
-        saveBufferAsPDFDoc(buffer, outputName);
-        console.log(`Finished downloading ${outputName}`);
-      });
+  function saveBufferAsPDFDoc(buf, name) {
+    console.log(buf, name);
 
-    const runOfficeToPDF = (inputUrl, type) => {
-      PDFNet.initialize()
-        .then(() => convertOfficeToPDF(inputUrl, `converted_${type}.pdf`))
-        .then(() => {
-          console.log("Test Complete!");
-        })
-        .catch((err) => {
-          console.log("An error was encountered! :(", err);
+    return saveBuffer(buf, name, "application/pdf");
+  }
+
+  const generatePdf = () => {
+    ((exports) => {
+      const Core = exports.Core;
+      const PDFNet = Core.PDFNet;
+      const convertOfficeToPDF = (inputUrl, outputName, l) =>
+        Core.office2PDFBuffer(inputUrl, { l }).then((buffer) => {
+          console.log(`Finished downloading ${outputName}`);
+          saveBufferAsPDFDoc(buffer, outputName);
         });
-    };
 
-    runOfficeToPDF("https://docxtemplater.com/tag-example.docx", "DOCX");
+      const runOfficeToPDF = (fileName, type) => {
+        console.log(fileName, type);
+        const inputDir = "../files/";
+
+        PDFNet.initialize()
+          .then(() => {
+            console.log(`inside first promise`);
+            return convertOfficeToPDF(
+              inputDir + fileName,
+              `converted_${type}.pdf`
+            );
+          })
+          .then(() => {
+            console.log("Test Complete!");
+          })
+          .catch((err) => {
+            console.log("An error was encountered! :(", err);
+          });
+      };
+      return runOfficeToPDF("template.docx", "DOCX");
+    })(window);
   };
 
   return (
     <>
-      <h1>Generate PDF DOCUMENT WITH THE example you have provided for us</h1>
-      <button onClick={generatePdfDocument}>Generate PDF</button>
+      <div id="webviewer"></div>
+      <button onClick={generatePdf}>Click</button>
     </>
   );
-}
+};
 
 export default App;
