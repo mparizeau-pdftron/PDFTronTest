@@ -2,6 +2,8 @@ import React from "react";
 import { saveAs } from "file-saver";
 
 const App = () => {
+  window.Core.setWorkerPath('WebViewer/lib/core');
+
   function saveBuffer(buf, name, mimetype) {
     const blob = new Blob([buf], {
       type: mimetype,
